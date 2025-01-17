@@ -23,26 +23,26 @@
 module Multiplier(a, b, result);
 input[3:0] a,b;
 output [7:0] result;
-assign r0 = a[0]&b[0];
+assign r0 = a[0]&b[0];                      //First digit of product
 wire r1;
-assign r1 = (a[1]&b[0])|(a[0]&b[1]);
-wire AC1Carrry, AC1Sum, AC1X1, AC1X2, AC1X3;
+assign r1 = (a[1]&b[0])|(a[0]&b[1]);        //Second digit is from an approximate half adder which considers OR operation as sum and carry 0
+wire AC1Carrry, AC1Sum, AC1X1, AC1X2, AC1X3; //AC1 is the Approximate compressor used to compress AC1X1, AC1X2 and AC1X3
 assign AC1X1 = a[2]&b[0];
 assign AC1X2 = a[1]&b[1];
 assign AC1X3 = a[0]&b[2];
 assign AC1Sum = ((~AC1X1)&AC1X2)|((~AC1X1)&AC1X3)|((AC1X1&(~AC1X2))&(~AC1X3));
 assign AC1Carry = (AC1X1&AC1X2)|(AC1X1&AC1X3);
-wire AFSum, AFCarry;
+wire AFSum, AFCarry;                         //AF is the Approximate full added used for p30, p21 and AC1Carry, generate terms are ignored
 assign p30 = (a[3]&b[0])|(a[0]&b[3]);
 assign p21 = (a[2]&b[1])|(a[1]&b[2]);
 assign AFSum = p30|p21|AC1Carry;
 assign AFCarry = AC1Carry;
-wire[2:0] Exact1;
+wire[2:0] Exact1;                           //Exact addition takes place for the next partial products
 wire[1:0] Exact2;
 wire Eaxct3;
 assign Exact1 = {(a[3]&b[3]),(a[3]&b[2]),(a[3]&b[1])};
 assign Exact2 = {(a[2]&b[3]),(a[2]&b[2])};
 assign Exact3 = (a[1]&b[3]);
 
-assign result = {(Exact3+Exact2+Exact1+AFCarry),AFSum,AC1Sum,r1,r0};
+assign result = {(Exact3+Exact2+Exact1+AFCarry),AFSum,AC1Sum,r1,r0};          //Concatenation of exact and approximated parts
 endmodule
